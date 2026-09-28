@@ -8,7 +8,6 @@ import path from "node:path";
 import fs from "node:fs";
 const env = getEnv();
 const app = express();
-app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 const PORT = env.PORT;
@@ -18,6 +17,7 @@ const rawJson = express.raw({ type: "application/json", limit: "1mb" }); //مش�
 app.post("/webhooks/clerk", rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
+app.use(express.json());
 
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
