@@ -6,6 +6,7 @@ import { getEnv } from "./lib/env";
 import { clerkWebhookHandler } from "./webhooks/clerk";
 import path from "node:path";
 import fs from "node:fs";
+import keepAliveCron from "./lib/cron";
 const env = getEnv();
 const app = express();
 app.use(cors());
@@ -19,6 +20,9 @@ app.post("/webhooks/clerk", rawJson, (req, res) => {
 });
 app.use(express.json());
 
+app.get("/health", (_req, res) => {
+  res.json({ ok: true });
+});
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
@@ -39,4 +43,7 @@ if (fs.existsSync(publicDir)) {
 }
 app.listen(PORT, () => {
   console.log("Listening on port 3001 ");
+  if (env.NODE_ENV === "production") {
+    keepAliveCron.start();
+  }
 });
