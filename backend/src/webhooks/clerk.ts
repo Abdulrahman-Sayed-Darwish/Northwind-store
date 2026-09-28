@@ -66,8 +66,10 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
     }
     res.json({ ok: true });
   } catch (err) {
-    // Bad signature, malformed payload, or DB error — do not leak details to the client.
     console.error("Clerk webhook error", err);
-    res.status(400).json({ error: "Invalid webhook" });
+
+    res.status(500).json({
+      error: "Webhook processing failed",
+    });
   }
 }
