@@ -9,7 +9,7 @@ import fs from "node:fs";
 import keepAliveCron from "./lib/cron";
 import meRouter from "./routes/meRouter";
 import productRouter from "./routes/productRouter";
-import streamRouter from "./routes/streamRouter.ts";
+import streamRouter from "./routes/streamRouter";
 const app = express();
 app.use(cors());
 const env = getEnv();
