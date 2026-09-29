@@ -7,13 +7,16 @@ import { clerkWebhookHandler } from "./webhooks/clerk";
 import path from "node:path";
 import fs from "node:fs";
 import keepAliveCron from "./lib/cron";
-const env = getEnv();
+import meRouter from "./routes/meRouter";
+import productRouter from "./routes/productRouter";
+import streamRouter from "./routes/streamRouter.ts";
 const app = express();
 app.use(cors());
-app.use(clerkMiddleware());
+const env = getEnv();
 const PORT = env.PORT;
-const rawJson = express.raw({ type: "application/json", limit: "1mb" }); //مشكلة التحقق من إن الـ Webhook جاي فعلًا من Clerk ومحدش لعب في البيانات.
+app.use(clerkMiddleware());
 
+const rawJson = express.raw({ type: "application/json", limit: "1mb" }); //مشكلة التحقق من إن الـ Webhook جاي فعلًا من Clerk ومحدش لعب في البيانات.
 // it's important that you don't parse the webhook event data, it should be in the raw format
 app.post("/webhooks/clerk", rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
@@ -23,6 +26,11 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
+
+app.get("/api/me", meRouter);
+app.get("/api/products", productRouter);
+app.get("/api/stream", streamRouter);
+
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
@@ -42,7 +50,7 @@ if (fs.existsSync(publicDir)) {
   });
 }
 app.listen(PORT, () => {
-  console.log("Listening on port 3001 ");
+  console.log(`Listening on port ${PORT}`);
   if (env.NODE_ENV === "production") {
     keepAliveCron.start();
   }
