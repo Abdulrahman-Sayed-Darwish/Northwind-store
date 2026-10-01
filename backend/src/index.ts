@@ -12,11 +12,14 @@ import productRouter from "./routes/productRouter";
 import streamRouter from "./routes/streamRouter";
 import checkoutRouter from "./routes/checkoutRouter";
 import { polarWebhookHandler } from "./webhooks/polar";
+import * as Sentry from "@sentry/node";
+import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
 const app = express();
 app.use(cors());
 const env = getEnv();
 const PORT = env.PORT;
 app.use(clerkMiddleware());
+app.use(sentryClerkUserMiddleware);
 
 const rawJson = express.raw({ type: "application/json", limit: "1mb" }); //مشكلة التحقق من إن الـ Webhook جاي فعلًا من Clerk ومحدش لعب في البيانات.
 // it's important that you don't parse the webhook event data, it should be in the raw format
@@ -55,6 +58,24 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
+// sentry will be attached to the response object
+Sentry.setupExpressErrorHandler(app);
+app.use(
+  (
+    _err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    const sentryId = (res as express.Response & { sentry?: string }).sentry;
+
+    res.status(500).json({
+      error: "Internal server error",
+      ...(sentryId !== undefined && { sentryId }),
+    });
+  },
+);
+
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
   if (env.NODE_ENV === "production") {
