@@ -11,9 +11,12 @@ import meRouter from "./routes/meRouter";
 import productRouter from "./routes/productRouter";
 import streamRouter from "./routes/streamRouter";
 import checkoutRouter from "./routes/checkoutRouter";
+import adminRouter from "./routes/adminRouter";
+
 import { polarWebhookHandler } from "./webhooks/polar";
-import * as Sentry from "@sentry/node";
 import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
+
+import * as Sentry from "@sentry/node";
 const app = express();
 app.use(cors());
 const env = getEnv();
@@ -40,6 +43,7 @@ app.use("/api/me", meRouter);
 app.use("/api/products", productRouter);
 app.use("/api/stream", streamRouter);
 app.use("/api/checkout", checkoutRouter);
+app.use("/api/admin", adminRouter);
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
