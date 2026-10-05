@@ -21,6 +21,8 @@ import * as Sentry from "@sentry/node";
 const app = express();
 app.use(cors());
 const env = getEnv();
+console.log("CLERK SECRET EXISTS:", !!env.CLERK_SECRET_KEY);
+console.log("CLERK SECRET PREFIX:", env.CLERK_SECRET_KEY?.slice(0, 8));
 const PORT = env.PORT;
 app.use(clerkMiddleware());
 app.use(sentryClerkUserMiddleware);

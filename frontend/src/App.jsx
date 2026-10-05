@@ -1,10 +1,4 @@
-import {
-  Show,
-  SignInButton,
-  SignUpButton,
-  useAuth,
-  UserButton,
-} from "@clerk/react";
+import { useAuth } from "@clerk/react";
 import PageLoader from "./components/PageLoader";
 import Layout from "./components/Layout";
 function App() {
@@ -13,15 +7,8 @@ function App() {
   return (
     <Layout>
       <header>
-        <Show when="signed-out">
-          <SignInButton mode="modal" />
-          <SignUpButton mode="modal" />
-        </Show>
-        <Show when="signed-in">
-          <UserButton />
-        </Show>
+        <button className="btn bg-gray-100 text-black">Click me</button>
       </header>
-      <button className="btn bg-gray-100 text-black">Click me</button>
     </Layout>
   );
 }

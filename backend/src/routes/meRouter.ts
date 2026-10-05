@@ -17,7 +17,7 @@ router.get("/", async (req, res, next) => {
       });
       return;
     }
-    res.json(user);
+    res.json({ user });
   } catch (e) {
     next(e);
   }
