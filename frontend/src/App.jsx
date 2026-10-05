@@ -1,14 +1,16 @@
 import { useAuth } from "@clerk/react";
 import PageLoader from "./components/PageLoader";
 import Layout from "./components/Layout";
+import { Route, Routes } from "react-router";
+import HomePage from "./pages/HomePage";
 function App() {
   const { isLoaded } = useAuth();
   if (!isLoaded) return <PageLoader />;
   return (
     <Layout>
-      <header>
-        <button className="btn bg-gray-100 text-black">Click me</button>
-      </header>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
     </Layout>
   );
 }
