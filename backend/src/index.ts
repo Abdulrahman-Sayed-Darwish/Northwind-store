@@ -21,8 +21,6 @@ import * as Sentry from "@sentry/node";
 const app = express();
 app.use(cors());
 const env = getEnv();
-console.log("CLERK SECRET EXISTS:", !!env.CLERK_SECRET_KEY);
-console.log("CLERK SECRET PREFIX:", env.CLERK_SECRET_KEY?.slice(0, 8));
 const PORT = env.PORT;
 app.use(clerkMiddleware());
 app.use(sentryClerkUserMiddleware);
@@ -32,7 +30,10 @@ const rawJson = express.raw({ type: "application/json", limit: "1mb" }); //مش�
 app.post("/webhooks/clerk", rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
+// console.log("🔥 POLAR ROUTE HIT");
+
 app.post("/webhooks/polar", rawJson, (req, res) => {
+  console.log("🔥 POLAR ROUTE HIT");
   void polarWebhookHandler(req, res);
 });
 

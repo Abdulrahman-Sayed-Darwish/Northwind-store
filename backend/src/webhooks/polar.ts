@@ -80,8 +80,8 @@ async function fulfillCheckoutSession(
 }
 // لما Polar تقول للـ Backend إن الدفع نجح، الـ Backend ينشئ Order في قاعدة البيانات.
 export async function polarWebhookHandler(req: Request, res: Response) {
+  console.log("POLAR WEBHOOK HIT", req.headers["webhook-id"]);
   const env = getEnv();
-
   try {
     if (!env.POLAR_WEBHOOK_SECRET) {
       res.status(503).send("Polar webhooks not configured");
@@ -157,7 +157,10 @@ export async function polarWebhookHandler(req: Request, res: Response) {
 
     res.json({ ok: true });
   } catch (err) {
-    console.error("Polar webhook error", err);
+    console.error(
+      "Polar webhook error:",
+      err instanceof Error ? err.message : err,
+    );
     res.status(400).json({ error: "Invalid webhook" });
   }
 }
