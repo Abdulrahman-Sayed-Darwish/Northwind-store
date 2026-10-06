@@ -18,17 +18,20 @@ type CheckoutCreateBody = {
 };
 // تحوّل بيانات الطلب عندك إلى Checkout في Polar، وتأخذ رابط الدفع من Polar.
 export async function polarCreateCheckout(env: Env, body: CheckoutCreateBody) {
-  const token = env.POLAR_ACCESS_TOKEN;
+  const token = env.POLAR_ACCESS_TOKEN?.trim();
   if (!token) throw new Error("POLAR_ACCESS_TOKEN is not configured");
 
-  const res = await fetch(`${env.POLAR_API_BASE}/v1/checkouts/`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${env.POLAR_API_BASE.trim().replace(/\/+$/, "")}/v1/checkouts/`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+  );
 
   if (!res.ok) {
     const errText = await res.text();

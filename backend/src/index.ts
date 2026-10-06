@@ -70,11 +70,12 @@ if (fs.existsSync(publicDir)) {
 Sentry.setupExpressErrorHandler(app);
 app.use(
   (
-    _err: unknown,
+    err: unknown,
     _req: express.Request,
     res: express.Response,
     _next: express.NextFunction,
   ) => {
+    console.error("🔥 SERVER ERROR:", err);
     const sentryId = (res as express.Response & { sentry?: string }).sentry;
 
     res.status(500).json({
