@@ -93,6 +93,12 @@ export async function polarWebhookHandler(req: Request, res: Response) {
     const wh = new Webhook(
       Buffer.from(env.POLAR_WEBHOOK_SECRET, "utf8").toString("base64"),
     );
+    console.log(
+      "isBuffer:",
+      Buffer.isBuffer(req.body),
+      "len:",
+      req.body?.length,
+    );
 
     const id = headerString(req.headers, "webhook-id");
     const ts = headerString(req.headers, "webhook-timestamp");
@@ -102,8 +108,8 @@ export async function polarWebhookHandler(req: Request, res: Response) {
       res.status(400).json({ error: "Missing webhook headers" });
       return;
     }
-const s = env.POLAR_WEBHOOK_SECRET.trim();
-console.log("secret edges:", s.slice(0, 10), "...", s.slice(-6));
+    const s = env.POLAR_WEBHOOK_SECRET.trim();
+    console.log("secret edges:", s.slice(0, 10), "...", s.slice(-6));
     wh.verify(raw, {
       "webhook-id": id,
       "webhook-timestamp": ts,
