@@ -79,36 +79,10 @@ async function fulfillCheckoutSession(
   });
 }
 
-// يجرّب أكتر من طريقة لتمرير السكرت لحد ما واحدة تنجح
-function verifyPolarSignature(
-  raw: Buffer,
-  secretRaw: string,
-  headers: Record<string, string>,
-) {
-  const secret = secretRaw.trim();
-  const attempts: Array<[string, () => Webhook]> = [
-    [
-      "base64(full secret)",
-      () => new Webhook(Buffer.from(secret, "utf8").toString("base64")),
-    ],
-    ["secret as-is", () => new Webhook(secret)],
-    ["secret without whsec_", () => new Webhook(secret.replace(/^whsec_/, ""))],
-  ];
-
-  for (const [name, make] of attempts) {
-    try {
-      make().verify(raw, headers);
-      console.log("verify OK with:", name);
-      return;
-    } catch {
-      // جرّب اللي بعده
-    }
-  }
-  throw new Error("No matching signature found");
-}
-
+// لما Polar تقول للـ Backend إن الدفع نجح، الـ Backend ينشئ Order في قاعدة البيانات.
 export async function polarWebhookHandler(req: Request, res: Response) {
   const env = getEnv();
+
   try {
     if (!env.POLAR_WEBHOOK_SECRET) {
       res.status(503).send("Polar webhooks not configured");
@@ -130,7 +104,10 @@ export async function polarWebhookHandler(req: Request, res: Response) {
       return;
     }
 
-    verifyPolarSignature(raw, env.POLAR_WEBHOOK_SECRET, {
+    // اتأكد إن الـ Webhook فعلًا جاي من Polar ومحدش مزوره.
+    // السكرت بيتمرر كما هو (بصيغة whsec_...) والمكتبة بتفكه بنفسها.
+    const wh = new Webhook(env.POLAR_WEBHOOK_SECRET.trim());
+    wh.verify(raw, {
       "webhook-id": id,
       "webhook-timestamp": ts,
       "webhook-signature": sig,
@@ -140,7 +117,6 @@ export async function polarWebhookHandler(req: Request, res: Response) {
       type: string;
       data?: Record<string, unknown>;
     };
-    console.log("POLAR EVENT:", event.type);
 
     if (event.type === "order.paid" && event.data) {
       const data = event.data;
@@ -154,15 +130,13 @@ export async function polarWebhookHandler(req: Request, res: Response) {
       }
 
       const sessionId = checkoutSessionIdFromMetadata(data);
+
       if (!sessionId) {
-        console.warn("order.paid without checkout_session_id", {
+        console.warn("Polar order.paid without checkout_session_id", {
           polarOrderId,
           checkoutId,
-          metadata: data.metadata,
         });
-      }
-
-      if (sessionId) {
+      } else {
         const ok = await fulfillCheckoutSession(
           sessionId,
           polarOrderId,
