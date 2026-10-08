@@ -8,6 +8,10 @@ import { Navigate } from "react-router";
 import OrdersPage from "./pages/OrdersPage";
 import CheckoutReturnPage from "./pages/CheckoutReturnPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import { SentryDemoPage } from "./pages/SentryDemoPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
+import OrderSummaryPage from "./pages/OrderSummaryPage";
+import OrderChatPage from "./pages/OrderChatPage";
 function App() {
   const { isLoaded, isSignedIn } = useAuth();
   if (!isLoaded) return <PageLoader />;
@@ -23,6 +27,12 @@ function App() {
         />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout/return" element={<CheckoutReturnPage />} />
+        <Route path="/demo-sentry" element={<SentryDemoPage />} />
+        {/* Nested Routes */}
+        <Route path="/orders/:id" element={<OrderDetailPage />}>
+          <Route index element={<OrderSummaryPage />} />
+          <Route path="chat" element={<OrderChatPage />} /> //orders/:id/chat
+        </Route>
       </Routes>
     </Layout>
   );
